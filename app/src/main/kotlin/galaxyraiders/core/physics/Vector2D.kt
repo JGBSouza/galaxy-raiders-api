@@ -1,51 +1,61 @@
-import kotlin.math.sqrt
-import kotlin.math.abs
-import kotlin.math.atan2
+package galaxyraiders.core.physics
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
-class Vector2D(var dx:Double, var dy:Double){
-    fun defineMagnitude(dx:Double, dy:Double): Double{
-        return abs(sqrt(dx * dy))
+@JsonIgnoreProperties("unit", "normal", "degree", "magnitude")
+data class Vector2D(val dx: Double, val dy: Double){
+    override fun toString(): String {
+        return "Vector2D(dx=$dx, dy=$dy)"
     }
 
-    fun defineRadiant(dx:Double, dy:Double): Double{
-        return atan2(dx, dy)
-    }
-
-    fun defineAngle(radiant:Double): Double{
-        return 180 * radiant/PI
-    }
+    val magnitude: Double
+        get() = sqrt(this.dx * this.dx + this.dy * this.dy)
     
-    var magnitude:Double = defineMagnitude(dx, dy)
-    var radiant: Double = defineRadiant(dx, dy)
-    var degree: Double = defineAngle(radiant)
+    val radiant: Double 
+        get() = atan2(this.dy, this.dx)
 
-    operator fun times(scalar: Double) = Vector2D(
-        dx = dx * scalar,
-        dy = dy * scalar
-    )
+    val degree: Double 
+        get() =  180 * radiant/PI
 
-    operator fun div(scalar: Double) = Vector2D(
-        dx = dx / scalar,
-        dy = dy / scalar
-    )
+    val unit: Vector2D 
+        get() = this / this.magnitude 
+    
+    val normal: Vector2D
+        get() = Vector2D(this.unit.dy, -this.unit.dx)
 
-    operator fun plus(vector: Vector2D) = Vector2D(
-        dx = dx + vector.dx,
-        dy = dy + vector.dy
-    )
+    
+    
+    
+    operator fun times(scalar: Double) = Vector2D(this.dx * scalar, this.dy * scalar)
 
-    operator fun unaryMinus() = Vector2D(
-        dx = -dx,
-        dy = -dy
-    )
 
+    
+    operator fun div(scalar: Double) = Vector2D(this.dx / scalar, this.dy / scalar)
+    
+    operator fun minus(vector: Vector2D) = Vector2D(this.dx - vector.dx, this.dy - vector.dy)
+    operator fun plus(vector: Vector2D) = Vector2D(this.dx + vector.dx, this.dy + vector.dy) 
+    
+    operator fun times(vector: Vector2D):Double = (this.dx * vector.dx) + (dy * vector.dy)
+    operator fun div(vector: Vector2D):Double = ((this.dx / vector.dx) + (dy / vector.dx))
+
+    operator fun unaryMinus() = Vector2D(dx = -dx, dy = -dy)
+
+    operator fun plus(point: Point2D) = Point2D(dx + point.x, dy + point.y) 
+
+    fun vectorProject(vector: Vector2D): Vector2D {
+        return this.scalarProject(vector) * vector.unit
+    }
+
+    fun scalarProject(vector: Vector2D): Double {
+        return (this * vector / vector.magnitude)
+    }
+       
 }
 
-
-fun main(){
-    val vector = Vector2D(1.0, 0.5)
-    println(vector.radiant)
-    println(vector.degree)
-
+operator fun Double.times(v: Vector2D): Vector2D {
+    return v * this
 }
+
