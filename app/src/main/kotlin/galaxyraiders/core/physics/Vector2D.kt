@@ -1,66 +1,51 @@
-@file:Suppress("UNUSED_PARAMETER") // <- REMOVE
-package galaxyraiders.core.physics
+import kotlin.math.sqrt
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.PI
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+class Vector2D(var dx:Double, var dy:Double){
+    fun defineMagnitude(dx:Double, dy:Double): Double{
+        return abs(sqrt(dx * dy))
+    }
 
-@JsonIgnoreProperties("unit", "normal", "degree", "magnitude")
-data class Vector2D(val dx: Double, val dy: Double) {
-  override fun toString(): String {
-    return "Vector2D(dx=$dx, dy=$dy)"
-  }
+    fun defineRadiant(dx:Double, dy:Double): Double{
+        return atan2(dx, dy)
+    }
 
-  val magnitude: Double
-    get() = INVALID_DOUBLE
+    fun defineAngle(radiant:Double): Double{
+        return 180 * radiant/PI
+    }
+    
+    var magnitude:Double = defineMagnitude(dx, dy)
+    var radiant: Double = defineRadiant(dx, dy)
+    var degree: Double = defineAngle(radiant)
 
-  val radiant: Double
-    get() = INVALID_DOUBLE
+    operator fun times(scalar: Double) = Vector2D(
+        dx = dx * scalar,
+        dy = dy * scalar
+    )
 
-  val degree: Double
-    get() = INVALID_DOUBLE
+    operator fun div(scalar: Double) = Vector2D(
+        dx = dx / scalar,
+        dy = dy / scalar
+    )
 
-  val unit: Vector2D
-    get() = INVALID_VECTOR
+    operator fun plus(vector: Vector2D) = Vector2D(
+        dx = dx + vector.dx,
+        dy = dy + vector.dy
+    )
 
-  val normal: Vector2D
-    get() = INVALID_VECTOR
+    operator fun unaryMinus() = Vector2D(
+        dx = -dx,
+        dy = -dy
+    )
 
-  operator fun times(scalar: Double): Vector2D {
-    return INVALID_VECTOR
-  }
-
-  operator fun div(scalar: Double): Vector2D {
-    return INVALID_VECTOR
-  }
-
-  operator fun times(v: Vector2D): Double {
-    return INVALID_DOUBLE
-  }
-
-  operator fun plus(v: Vector2D): Vector2D {
-    return INVALID_VECTOR
-  }
-
-  operator fun plus(p: Point2D): Point2D {
-    return INVALID_POINT
-  }
-
-  operator fun unaryMinus(): Vector2D {
-    return INVALID_VECTOR
-  }
-
-  operator fun minus(v: Vector2D): Vector2D {
-    return INVALID_VECTOR
-  }
-
-  fun scalarProject(target: Vector2D): Double {
-    return INVALID_DOUBLE
-  }
-
-  fun vectorProject(target: Vector2D): Vector2D {
-    return INVALID_VECTOR
-  }
 }
 
-operator fun Double.times(v: Vector2D): Vector2D {
-  return INVALID_VECTOR
+
+fun main(){
+    val vector = Vector2D(1.0, 0.5)
+    println(vector.radiant)
+    println(vector.degree)
+
 }
