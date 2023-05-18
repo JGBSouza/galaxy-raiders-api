@@ -1,9 +1,7 @@
 package galaxyraiders.core.physics
-import kotlin.math.sqrt
 import kotlin.math.abs
 import kotlin.math.pow
-
-
+import kotlin.math.sqrt
 
 data class Point2D(val x: Double, val y: Double) {
   operator fun plus(p: Point2D): Point2D {
@@ -35,13 +33,13 @@ data class Point2D(val x: Double, val y: Double) {
     return Vector2D(impactVector.normal.dx, impactVector.normal.dy)
   }
 
-  fun contactDirection(p: Point2D): Vector2D {    
+  fun contactDirection(p: Point2D): Vector2D {
     return impactDirection(p).normal
   }
 
   fun distance(p: Point2D): Double {
-    val deltaX : Double = this.x - p.x
-    val deltaY : Double = this.y - p.y
+    val deltaX: Double = this.x - p.x
+    val deltaY: Double = this.y - p.y
     val d: Double = Math.sqrt(Math.pow(deltaX, 2.0) + Math.pow(deltaY, 2.0))
     return d
   }
