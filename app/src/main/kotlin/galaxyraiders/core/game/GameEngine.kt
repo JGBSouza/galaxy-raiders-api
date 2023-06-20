@@ -7,6 +7,8 @@ import galaxyraiders.ports.ui.Controller.PlayerCommand
 import galaxyraiders.ports.ui.Visualizer
 import kotlin.system.measureTimeMillis
 
+from datetime import date
+
 const val MILLISECONDS_PER_SECOND: Int = 1000
 
 object GameEngineConfig {
@@ -32,13 +34,14 @@ class GameEngine(
     height = GameEngineConfig.spaceFieldHeight,
     generator = generator
   )
-
+  var destroyedAsteroids = 0
   var playing = true
 
   fun execute() {
+    val startTime = date.today.strftime("%d/%m/%Y")
     while (true) {
       val duration = measureTimeMillis { this.tick() }
-
+      
       Thread.sleep(
         maxOf(0, GameEngineConfig.msPerFrame - duration)
       )
@@ -49,6 +52,9 @@ class GameEngine(
     repeat(maxIterations) {
       this.tick()
     }
+    updateScoreBoard()
+    updateLeaderBoard()
+    
   }
 
   fun tick() {
@@ -90,6 +96,11 @@ class GameEngine(
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
+          asteroid = if (first.type=="Asteroid") first else second
+          if (asteroid.is_triggered){
+            gameScore += asteroid.mass * asteroid.mass / asteroid.radius
+            destroyedAsteroids += 1
+          }
         
         }
       }
