@@ -11,7 +11,9 @@ class Explosion(
 ) : SpaceObject("Explosion", '@', initialPosition, initialVelocity, radius, mass) {
   var is_triggered: Boolean = false
   
-  fun explode( ): Boolean {
-    return true;
+  fun explode( ){
+    // acontece a explosao de alguma forma
+    is_triggered = true
+
   }
 }

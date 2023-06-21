@@ -90,7 +90,8 @@ class GameEngine(
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
-        
+            //tem que ter explosao
+            this.field.generateExplosion() //como passar o local da explosao?
         }
       }
     }

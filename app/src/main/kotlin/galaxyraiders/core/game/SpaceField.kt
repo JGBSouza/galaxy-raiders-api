@@ -38,6 +38,11 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   var asteroids: List<Asteroid> = emptyList()
     private set
 
+  // cria uma lista vazia de explosoes
+  var explosions: List<Explosion> = emptyList()
+    private set
+  // 
+
   val spaceObjects: List<SpaceObject>
     get() = listOf(this.ship) + this.missiles + this.asteroids
 
@@ -60,6 +65,12 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   fun generateAsteroid() {
     this.asteroids += this.createAsteroidWithRandomProperties()
   }
+
+  //gera mais uma explosao 
+  fun generateExplosion(){
+    this.explosions += this.createExplosion()
+  }
+  //
 
   fun trimMissiles() {
     this.missiles = this.missiles.filter {
@@ -123,6 +134,16 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     )
   }
 
+  // cria a explosao
+  private fun createExplosion(): Explosion{
+    return Explosion(
+    initialPosition , 
+    initialVelocity , 
+    radius = 1.0, 
+    mass = 1.0)
+  }
+  //
+
   private fun generateRandomAsteroidVelocity(): Vector2D {
     val asteroidYaw = this.generator.generateDoubleInInterval(
       min = -SpaceFieldConfig.asteroidMaxYaw, max = SpaceFieldConfig.asteroidMaxYaw
@@ -153,4 +174,6 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
 
     return scaledMass * SpaceFieldConfig.asteroidMassMultiplier
   }
+
+
 }
