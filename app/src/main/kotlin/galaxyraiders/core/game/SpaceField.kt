@@ -67,8 +67,8 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   }
 
   //gera mais uma explosao 
-  fun generateExplosion(){
-    this.explosions += this.createExplosion()
+  fun generateExplosion( initialPosition: Point2D, radius: Double, mass: Double){
+    this.explosions += this.createExplosion(initialPosition, radius, mass)
   }
   //
 
@@ -135,12 +135,8 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   }
 
   // cria a explosao
-  private fun createExplosion(): Explosion{
-    return Explosion(
-    initialPosition , 
-    initialVelocity , 
-    radius = 1.0, 
-    mass = 1.0)
+  private fun createExplosion(initialPosition: Point2D, radius: Double, mass: Double): Explosion{
+    return Explosion( initialPosition, radius, mass)
   }
   //
 

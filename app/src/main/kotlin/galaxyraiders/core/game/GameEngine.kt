@@ -96,14 +96,15 @@ class GameEngine(
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
-            //tem que ter explosao
+          //tem que ter explosao
+          this.field.generateExplosion(first.center, 5.0, 5.0)
 
           asteroid = if (first.type=="Asteroid") first else second
           if (asteroid.is_triggered){
             gameScore += asteroid.mass * asteroid.mass / asteroid.radius
             destroyedAsteroids += 1
           }
-        this.field.generateExplosion() //como passar o local da explosao?
+        
         }
       }
     }
