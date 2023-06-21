@@ -6,8 +6,11 @@ import galaxyraiders.ports.ui.Controller
 import galaxyraiders.ports.ui.Controller.PlayerCommand
 import galaxyraiders.ports.ui.Visualizer
 import kotlin.system.measureTimeMillis
-
-from datetime import date
+import java.time.LocalDate
+import java.io.File
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.JsonObject
 
 const val MILLISECONDS_PER_SECOND: Int = 1000
 
@@ -34,11 +37,10 @@ class GameEngine(
     height = GameEngineConfig.spaceFieldHeight,
     generator = generator
   )
-  var destroyedAsteroids = 0
-  var playing = true
+  
 
   fun execute() {
-    val startTime = date.today.strftime("%d/%m/%Y")
+
     while (true) {
       val duration = measureTimeMillis { this.tick() }
       
@@ -46,17 +48,41 @@ class GameEngine(
         maxOf(0, GameEngineConfig.msPerFrame - duration)
       )
     }
+    //updateLeaderBoard()
   }
 
   fun execute(maxIterations: Int) {
+    val startTime = LocalDate.now()
+    var destroyedAsteroids = 0.0
+    var gameScore = 0.0
+    
     repeat(maxIterations) {
       this.tick()
     }
-    updateScoreBoard()
-    updateLeaderBoard()
+
+    
+    updateScoreBoard(gameScore, destroyedAsteroids, startTime)
+    
+  }
+  
+  class Score(val gameScore: Double, val destroyedAsteroids: Double, val startTime: LocalDate)
+  
+  fun updateScoreBoard(gameScore: Double, destroyedAsteroids: Double, startTime: LocalDate){
+    val scoreBoardJson = File("../score/text.json").readText()
+    //val scoreBoardArray = Klaxon().parseArray<Score>(scoreBoardJson)
+    //val currentScore = Score(gameScore, destroyedAsteroids, startTime)
+    /*val json = Klaxon().parse<Score>("""
+      {
+        "gameScore": "%.1f"
+      }
+    """.format()
+    )*/
     
   }
 
+  fun updateLeaderBoard(gameScore: Double, destroyedAsteroids: Double, startTime: LocalDate){
+    
+  }
   fun tick() {
     this.processPlayerInput()
     this.updateSpaceObjects()
@@ -104,10 +130,9 @@ class GameEngine(
             this.field.addExplosion(second)
             asteroid = first
           }
-          if (asteroid.is_triggered){
-            gameScore += asteroid.mass * asteroid.mass / asteroid.radius
-            destroyedAsteroids += 1
-          }
+          gameScore += asteroid.mass * asteroid.mass / asteroid.radius
+          destroyedAsteroids += 1
+    
         }
       }
     }
