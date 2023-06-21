@@ -86,25 +86,28 @@ class GameEngine(
     if (!this.playing) return
     this.handleCollisions()
     this.moveSpaceObjects()
-    this.trimSpaceObjects()
+    this.trimSpaceObjects() 
     this.generateAsteroids()
   }
 
   fun handleCollisions() {
+    val asteroid : SpaceObject
     this.field.spaceObjects.forEachPair {
         (first, second) ->
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
-          //tem que ter explosao
-          this.field.generateExplosion(first.center, 5.0, 5.0)
-
-          asteroid = if (first.type=="Asteroid") first else second
+          if (first is Missile) {
+            this.field.generateExplosion(first)
+            asteroid = second
+          }else{
+            this.field.addExplosion(second)
+            asteroid = first
+          }
           if (asteroid.is_triggered){
             gameScore += asteroid.mass * asteroid.mass / asteroid.radius
             destroyedAsteroids += 1
           }
-        
         }
       }
     }
@@ -114,11 +117,13 @@ class GameEngine(
     this.field.moveShip()
     this.field.moveAsteroids()
     this.field.moveMissiles()
+
   }
 
   fun trimSpaceObjects() {
     this.field.trimAsteroids()
     this.field.trimMissiles()
+    this.field.trimExplosion()
   }
 
   fun generateAsteroids() {

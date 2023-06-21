@@ -41,7 +41,6 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   // cria uma lista vazia de explosoes
   var explosions: List<Explosion> = emptyList()
     private set
-  // 
 
   val spaceObjects: List<SpaceObject>
     get() = listOf(this.ship) + this.missiles + this.asteroids
@@ -66,11 +65,18 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     this.asteroids += this.createAsteroidWithRandomProperties()
   }
 
-  //gera mais uma explosao 
-  fun generateExplosion( initialPosition: Point2D, radius: Double, mass: Double){
-    this.explosions += this.createExplosion(initialPosition, radius, mass)
+  //gera mais uma explosao e guarda na lista
+  fun generateExplosion(missle: Missle){
+    this.field.destroyMissile(missle)
+    this.explosions += this.createExplosion(missile.initialPosition, missle.radius, missle.mass)
   }
-  //
+
+  //verifica se a explosao ja acabou
+  fun trimExplosion() {
+    this.explosions = this.explosions.filter {
+      it.is_triggered
+    }
+  }
 
   fun trimMissiles() {
     this.missiles = this.missiles.filter {
@@ -110,6 +116,13 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     )
   }
 
+  private fun destroyMissile(missile: Missile) {
+    this.missiles = this.missiles.filter {
+      it != missile
+    }
+  }
+  
+
   private fun defineMissilePosition(missileRadius: Double): Point2D {
     return ship.center + Vector2D(dx = 0.0, dy = ship.radius + missileRadius + SpaceFieldConfig.missileDistanceFromShip)
   }
@@ -138,7 +151,7 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   private fun createExplosion(initialPosition: Point2D, radius: Double, mass: Double): Explosion{
     return Explosion( initialPosition, radius, mass)
   }
-  //
+
 
   private fun generateRandomAsteroidVelocity(): Vector2D {
     val asteroidYaw = this.generator.generateDoubleInInterval(
