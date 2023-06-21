@@ -122,11 +122,22 @@ class GameEngine(
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
+<<<<<<< HEAD
           var asteroid = if (first.type == "Asteroid") first else second
           //if (asteroid.is_triggered){
           gameScore += asteroid.mass * asteroid.mass / asteroid.radius
           destroyedAsteroids += 1
           //}
+=======
+          //tem que ter explosao
+          this.field.generateExplosion(first.center, 5.0, 5.0)
+
+          asteroid = if (first.type=="Asteroid") first else second
+          if (asteroid.is_triggered){
+            gameScore += asteroid.mass * asteroid.mass / asteroid.radius
+            destroyedAsteroids += 1
+          }
+>>>>>>> 5960936247bea5e24111b4d05d7627a61e4c623e
         
         }
       }
