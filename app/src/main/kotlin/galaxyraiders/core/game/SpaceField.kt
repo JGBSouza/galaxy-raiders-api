@@ -66,9 +66,9 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   }
 
   //gera mais uma explosao e guarda na lista
-  fun generateExplosion(missle: Missle){
-    this.field.destroyMissile(missle)
-    this.explosions += this.createExplosion(missile.initialPosition, missle.radius, missle.mass)
+  fun generateExplosion(missile: Missile){
+    this.field.destroyMissile(missile)
+    this.explosions += this.createExplosion(missile.initialPosition, missile.radius, missile.mass)
   }
 
   //verifica se a explosao ja acabou

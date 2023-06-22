@@ -6,11 +6,12 @@ import galaxyraiders.ports.ui.Controller
 import galaxyraiders.ports.ui.Controller.PlayerCommand
 import galaxyraiders.ports.ui.Visualizer
 import kotlin.system.measureTimeMillis
-import java.time.LocalDate
+import java.time.Instant
 import java.io.File
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
+import java.io.StringReader
 
 const val MILLISECONDS_PER_SECOND: Int = 1000
 
@@ -32,12 +33,22 @@ class GameEngine(
   val controller: Controller,
   val visualizer: Visualizer,
 ) {
+
   val field = SpaceField(
     width = GameEngineConfig.spaceFieldWidth,
     height = GameEngineConfig.spaceFieldHeight,
     generator = generator
   )
   
+  var scoreboardFile = File("src/main/kotlin/galaxyriders/core/score/Scoreboard.json")
+  var leaderboardFile = File("src/main/kotlin/galaxyriders/core/score/Leaderboard.json")
+  var scoreboardJson = JsonObject()
+  var leaderboardJson = JsonObject()
+  var destroyedAsteroids = 0
+  var gameScore = 0.0
+  var startTime = Instant.now().toString()
+
+  var playing = true 
 
   fun execute() {
 
@@ -48,27 +59,38 @@ class GameEngine(
         maxOf(0, GameEngineConfig.msPerFrame - duration)
       )
     }
-    //updateLeaderBoard()
   }
 
   fun execute(maxIterations: Int) {
-    val startTime = LocalDate.now()
-    var destroyedAsteroids = 0.0
-    var gameScore = 0.0
+   
     
     repeat(maxIterations) {
       this.tick()
     }
 
-    
-    updateScoreBoard(gameScore, destroyedAsteroids, startTime)
+    var finalScore = Score(gameScore, destroyedAsteroids, startTime)
+    this.updateScores(finalScore)
     
   }
   
-  class Score(val gameScore: Double, val destroyedAsteroids: Double, val startTime: LocalDate)
+  class Score(var gameScore: Double, var destroyedAsteroids: Int, var startTime: String){
+    override fun toString() : String = "\"\"\"" +
+                                "{\"score\": $gameScore," +
+                                "\"destroyedAsteroids\": $destroyedAsteroids," +
+                                "\"startTime\": \"$startTime\"}" +
+                                "\"\"\""
+  }
   
-  fun updateScoreBoard(gameScore: Double, destroyedAsteroids: Double, startTime: LocalDate){
-    val scoreBoardJson = File("../score/text.json").readText()
+  fun updateScores(score: Score){
+    this.checkBoardsExistence()
+
+    this.scoreboardJson = Klaxon().parseJsonObject(this.scoreboardFile.reader())
+    this.leaderboardJson = Klaxon().parseJsonObject(this.leaderboardFile.reader())
+
+    this.scoreboardJson = Klaxon().parseJsonObject(StringReader(score.toString())) 
+    this.scoreboardFile.writeText(this.scoreboardJson.toJsonString(prettyPrint = true))
+    
+
     //val scoreBoardArray = Klaxon().parseArray<Score>(scoreBoardJson)
     //val currentScore = Score(gameScore, destroyedAsteroids, startTime)
     /*val json = Klaxon().parse<Score>("""
@@ -80,9 +102,19 @@ class GameEngine(
     
   }
 
-  fun updateLeaderBoard(gameScore: Double, destroyedAsteroids: Double, startTime: LocalDate){
+  fun checkBoardsExistence(){
+    if (!this.scoreboardFile.exists()){ //if there's no scoreboard, leaderboard is usefull
+      this.scoreboardFile.createNewFile()
+      this.leaderboardFile.createNewFile()
+    }
+    if (!this.leaderboardFile.exists()) this.leaderboardFile.createNewFile()
+
+    if (this.scoreboardFile.readText().isEmpty()) this.scoreboardFile.writeText("{}")
+    if (this.leaderboardFile.readText().isEmpty()) this.leaderboardFile.writeText("{}")
     
   }
+
+ 
   fun tick() {
     this.processPlayerInput()
     this.updateSpaceObjects()
@@ -112,12 +144,12 @@ class GameEngine(
     if (!this.playing) return
     this.handleCollisions()
     this.moveSpaceObjects()
-    this.trimSpaceObjects() 
+    this.trimSpaceObjects()
     this.generateAsteroids()
   }
 
   fun handleCollisions() {
-    val asteroid : SpaceObject
+    var asteroid : SpaceObject
     this.field.spaceObjects.forEachPair {
         (first, second) ->
       if (first.impacts(second)) {
@@ -125,17 +157,20 @@ class GameEngine(
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
           if (first is Missile) {
             this.field.generateExplosion(first)
-            asteroid = second
+            this.addScore(second)   
           }else{
             this.field.addExplosion(second)
-            asteroid = first
+            this.addScore(first)   
           }
-          gameScore += asteroid.mass * asteroid.mass / asteroid.radius
-          destroyedAsteroids += 1
-    
+               
         }
       }
     }
+  }
+
+  fun addScore(asteroid : SpaceObject){
+    this.gameScore += (asteroid.mass * asteroid.mass)/asteroid.radius
+    this.destroyedAsteroids += 1
   }
 
   fun moveSpaceObjects() {
