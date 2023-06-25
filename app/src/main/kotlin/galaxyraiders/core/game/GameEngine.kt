@@ -6,7 +6,6 @@ import galaxyraiders.ports.ui.Controller
 import galaxyraiders.ports.ui.Controller.PlayerCommand
 import galaxyraiders.ports.ui.Visualizer
 import kotlin.system.measureTimeMillis
-import java.time.Instant
 import java.io.File
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.JsonArray
@@ -44,10 +43,7 @@ class GameEngine(
   var leaderboardFile = File("src/main/kotlin/galaxyriders/core/score/Leaderboard.json")
   var scoreboardJson = JsonObject()
   var leaderboardJson = JsonObject()
-  var destroyedAsteroids = 0
-  var gameScore = 0.0
-  var startTime = Instant.now().toString()
-
+  var status = GameStatus()
   var playing = true 
 
   fun execute() {
@@ -62,43 +58,25 @@ class GameEngine(
   }
 
   fun execute(maxIterations: Int) {
-   
-    
     repeat(maxIterations) {
       this.tick()
-    }
-
-    var finalScore = Score(gameScore, destroyedAsteroids, startTime)
-    this.updateScores(finalScore)
-    
+    }    
   }
   
-  class Score(var gameScore: Double, var destroyedAsteroids: Int, var startTime: String){
-    override fun toString() : String = "\"\"\"" +
-                                "{\"score\": $gameScore," +
-                                "\"destroyedAsteroids\": $destroyedAsteroids," +
-                                "\"startTime\": \"$startTime\"}" +
-                                "\"\"\""
-  }
-  
-  fun updateScores(score: Score){
+  fun updateScores(){
     this.checkBoardsExistence()
 
     this.scoreboardJson = Klaxon().parseJsonObject(this.scoreboardFile.reader())
     this.leaderboardJson = Klaxon().parseJsonObject(this.leaderboardFile.reader())
 
-    this.scoreboardJson = Klaxon().parseJsonObject(StringReader(score.toString())) 
+    this.scoreboardJson = Klaxon().parseJsonObject(StringReader(this.status.toJson())) 
     this.scoreboardFile.writeText(this.scoreboardJson.toJsonString(prettyPrint = true))
     
-
-    //val scoreBoardArray = Klaxon().parseArray<Score>(scoreBoardJson)
-    //val currentScore = Score(gameScore, destroyedAsteroids, startTime)
-    /*val json = Klaxon().parse<Score>("""
-      {
-        "gameScore": "%.1f"
-      }
-    """.format()
-    )*/
+    val sorted = this.scoreboardJson.toSortedMap(compareByDescending { this.scoreboardJson.obj(it)?.int("score") })
+    val leaders = sorted.toList().take(3)
+    this.leaderboardJson.clear()
+    this.leaderboardJson.putAll(leaders)
+    this.leaderboardFile.writeText(this.leaderboardJson.toJsonString(prettyPrint = true))
     
   }
 
@@ -157,10 +135,10 @@ class GameEngine(
         if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
           if (first is Missile) {
             this.field.generateExplosion(first)
-            this.addScore(second)   
+            this.status.addScore(second)   
           }else{
             this.field.addExplosion(second)
-            this.addScore(first)   
+            this.status.addScore(first)   
           }
                
         }
@@ -168,10 +146,7 @@ class GameEngine(
     }
   }
 
-  fun addScore(asteroid : SpaceObject){
-    this.gameScore += (asteroid.mass * asteroid.mass)/asteroid.radius
-    this.destroyedAsteroids += 1
-  }
+  
 
   fun moveSpaceObjects() {
     this.field.moveShip()

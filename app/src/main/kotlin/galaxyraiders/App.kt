@@ -31,7 +31,12 @@ fun main() {
     generator, controller, visualizer
   )
 
-  thread { gameEngine.execute() }
-
+  var mythread = thread { 
+    gameEngine.execute() 
+    
+    }
+while(mythread.isAlive()){}
+    gameEngine.updateScores()
+  
   ui.start()
 }
