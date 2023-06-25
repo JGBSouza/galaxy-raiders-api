@@ -3,20 +3,25 @@ package galaxyraiders.core.game
 import galaxyraiders.core.physics.Point2D
 import galaxyraiders.core.physics.Vector2D
 import java.util.Timer
+import java.util.TimerTask
 
+const val EXPLOSION_DURATION = 2000L
 class Explosion(
   initialPosition: Point2D,
-  //initialVelocity: Vector2D,
   radius: Double,
   mass: Double
 ) : SpaceObject("Explosion", '@', initialPosition, Vector2D(1.0, 1.0), radius, mass) {
   var is_triggered: Boolean = true
-  
-  var timer: Timer = Timer("schedule", true);
+  private set
 
-  init {
-    timer.schedule(3000) {
-        is_triggered = false
-    }
+   init {
+    Timer("Schedule", false).schedule(
+      object : TimerTask() {
+        override fun run() {
+          is_triggered = false
+        }
+      },
+      EXPLOSION_DURATION
+    )
   }
 }

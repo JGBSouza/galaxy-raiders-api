@@ -127,26 +127,24 @@ class GameEngine(
   }
 
   fun handleCollisions() {
-    var asteroid : SpaceObject
     this.field.spaceObjects.forEachPair {
         (first, second) ->
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
-        if((first.type=="Missle" && second.type=="Asteroid") || (second.type=="Missle" && first.type=="Asteroid")){
-          if (first is Missile) {
+        if ((first is Missile) and (second is Asteroid)) {
             this.field.generateExplosion(first)
-            this.status.addScore(second)   
-          }else{
-            this.field.addExplosion(second)
-            this.status.addScore(first)   
-          }
-               
+            this.status.addScore(second)  
         }
+
+        if ((first is Asteroid) and (second is Missile)){
+            this.field.generateExplosion(second)
+            this.status.addScore(first)   
+        }
+
       }
     }
   }
 
-  
 
   fun moveSpaceObjects() {
     this.field.moveShip()
