@@ -132,12 +132,12 @@ class GameEngine(
       if (first.impacts(second)) {
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
         if ((first is Missile) and (second is Asteroid)) {
-            this.field.generateExplosion(first)
+            this.field.generateExplosion(first, second)
             this.status.addScore(second)  
         }
 
         if ((first is Asteroid) and (second is Missile)){
-            this.field.generateExplosion(second)
+            this.field.generateExplosion(second, first)
             this.status.addScore(first)   
         }
 
