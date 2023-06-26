@@ -5,12 +5,11 @@ import galaxyraiders.core.physics.Vector2D
 import java.util.Timer
 import java.util.TimerTask
 
-const val EXPLOSION_DURATION = 2000L
 class Explosion(
   initialPosition: Point2D,
   radius: Double,
   mass: Double
-) : SpaceObject("Explosion", '@', initialPosition, Vector2D(1.0, 1.0), radius, mass) {
+) : SpaceObject("Explosion", '@', initialPosition, Vector2D(1.0, 1.0), 3.0, 0.0) {
   var is_triggered: Boolean = true
   private set
 
@@ -21,7 +20,7 @@ class Explosion(
           is_triggered = false
         }
       },
-      EXPLOSION_DURATION
+      2000L
     )
   }
 }
