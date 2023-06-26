@@ -38,6 +38,4 @@ fun main() {
 
   ui.start()
 
-  while(mythread.isAlive()){}
-    gameEngine.updateScores()
 }
