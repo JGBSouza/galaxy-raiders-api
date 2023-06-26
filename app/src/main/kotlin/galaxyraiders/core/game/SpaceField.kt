@@ -156,7 +156,7 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
 
   // cria a explosao
   private fun createExplosion(initialPosition: Point2D): Explosion{
-    return Explosion( initialPosition)
+    return Explosion(initialPosition)
   }
 
 
