@@ -7,8 +7,6 @@ import java.util.TimerTask
 
 class Explosion(
   initialPosition: Point2D,
-  radius: Double,
-  mass: Double
 ) : SpaceObject("Explosion", '@', initialPosition, Vector2D(1.0, 1.0), 3.0, 0.0) {
   var is_triggered: Boolean = true
   private set
