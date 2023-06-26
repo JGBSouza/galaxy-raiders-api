@@ -35,8 +35,9 @@ fun main() {
     gameEngine.execute() 
     
     }
-while(mythread.isAlive()){}
-    gameEngine.updateScores()
-  
+
   ui.start()
+
+  while(mythread.isAlive()){}
+    gameEngine.updateScores()
 }

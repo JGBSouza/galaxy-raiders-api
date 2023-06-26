@@ -39,8 +39,8 @@ class GameEngine(
     generator = generator
   )
   
-  var scoreboardFile = File("src/main/kotlin/galaxyriders/core/score/Scoreboard.json")
-  var leaderboardFile = File("src/main/kotlin/galaxyriders/core/score/Leaderboard.json")
+  var scoreboardFile = File("src/main/kotlin/galaxyraiders/core/score/Scoreboard.json")
+  var leaderboardFile = File("src/main/kotlin/galaxyraiders/core/score/Leaderboard.json")
   var scoreboardJson = JsonObject()
   var leaderboardJson = JsonObject()
   var status = GameStatus()
@@ -49,6 +49,8 @@ class GameEngine(
   fun execute() {
 
     while (true) {
+      this.checkBoardsExistence()
+      this.updateScores()
       val duration = measureTimeMillis { this.tick() }
       
       Thread.sleep(
@@ -64,12 +66,7 @@ class GameEngine(
   }
   
   fun updateScores(){
-    this.checkBoardsExistence()
-
-    this.scoreboardJson = Klaxon().parseJsonObject(this.scoreboardFile.reader())
-    this.leaderboardJson = Klaxon().parseJsonObject(this.leaderboardFile.reader())
-
-    this.scoreboardJson = Klaxon().parseJsonObject(StringReader(this.status.toJson())) 
+    this.scoreboardJson[this.status.startTime] = Klaxon().parseJsonObject(StringReader(this.status.toJson())) 
     this.scoreboardFile.writeText(this.scoreboardJson.toJsonString(prettyPrint = true))
     
     val sorted = this.scoreboardJson.toSortedMap(compareByDescending { this.scoreboardJson.obj(it)?.int("score") })
@@ -90,6 +87,9 @@ class GameEngine(
     if (this.scoreboardFile.readText().isEmpty()) this.scoreboardFile.writeText("{}")
     if (this.leaderboardFile.readText().isEmpty()) this.leaderboardFile.writeText("{}")
     
+    this.scoreboardJson = Klaxon().parseJsonObject(this.scoreboardFile.reader())
+    this.leaderboardJson = Klaxon().parseJsonObject(this.leaderboardFile.reader())
+
   }
 
  
@@ -134,11 +134,14 @@ class GameEngine(
         if ((first is Missile) and (second is Asteroid)) {
             this.field.generateExplosion(first, second)
             this.status.addScore(second)  
+            this.updateScores()
         }
 
         if ((first is Asteroid) and (second is Missile)){
             this.field.generateExplosion(second, first)
             this.status.addScore(first)   
+            this.updateScores()
+
         }
 
       }
