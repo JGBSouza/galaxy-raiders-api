@@ -13,10 +13,6 @@ class GameStatus(var score: Double = 0.0,
     }
 
     fun toJson(): String {
-        return ("\"\"\"" +
-                "{\"score\": ${this.score}," +
-                "\"destroyedAsteroids\": ${this.destroyedAsteroids}," +
-                "\"startTime\": \"${this.startTime}\"}" +
-                "\"\"\"")
+       return "{\"score\": ${this.score}, \"destroyedAsteroids\": ${this.destroyedAsteroids}}"
     }
 }
